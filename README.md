@@ -4,7 +4,7 @@
  ## Features of this code:
   * Object Oriented Programming
   * Linked Lists
-  * Fisher-Yates Shuffling Algorithm
+  * Implementation of the [Fisher-Yates Shuffling Algorithm](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
   * String stylization with Unicode
   * Explanatory comments
   * ...

@@ -1,5 +1,6 @@
 import random
 
+# Define Unicode for colorful text.
 class colors:
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
@@ -11,6 +12,13 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\033[0m'
+
+# Define Unicode characters for card suits
+class Suits:
+    SPADES = '\u2660'  # ♠
+    HEARTS = '\u2665'  # ♥
+    DIAMONDS = '\u2666'  # ♦
+    CLUBS = '\u2663'  # ♣
     
 class Payouts:
     def __init__(self, *args):
@@ -25,7 +33,7 @@ class Payouts:
 
 class Card:
     # A class to create card objects for constructing a Deck from a linked list.
-    def __init__(self, suit, value):
+    def __init__(self, value, suit):
         self.suit = suit
         self.value = value
         self.next = None
@@ -37,14 +45,14 @@ class Deck:
         self.initialize_deck()
 
     def initialize_deck(self):
-        suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+        suits = [Suits.HEARTS, Suits.DIAMONDS, Suits.CLUBS, Suits.SPADES]
+        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         for suit in suits:
             for value in values:
-                self.add_card(suit, value)
+                self.add_card(value, suit)
 
-    def add_card(self, suit, value):
-        new_card = Card(suit, value)
+    def add_card(self, value, suit):
+        new_card = Card(value, suit)
         if not self.head:
             self.head = new_card
         else:
@@ -62,7 +70,7 @@ class Deck:
             count += 1
             current = current.next
 
-        shuffled_nodes = []
+        shuffle_nodes = []
         prev = None
         current = self.head
 
@@ -83,24 +91,36 @@ class Deck:
                 self.head = current.next
 
             # Append the current node to the shuffled list
-            shuffled_nodes.append(current)
+            shuffle_nodes.append(current)
 
         # Reassign the head of the original list with the shuffled list
-        self.head = shuffled_nodes[0]
+        self.head = shuffle_nodes[0]
         current = self.head
-        for node in shuffled_nodes[1:]:
+        for node in shuffle_nodes[1:]:
             current.next = node
             current = current.next
         current.next = None
 
-        def deal_cards(self):
-            if not self.head:
-                return None
-            else:
-                dealt_card = self.head
-                self.head = self.head.next
-                return dealt_card
-            
+    def deal_cards(self, player):
+        count = 0
+        current = self.head
+        dealt_cards = None  # Initialize a variable to keep track of the dealt cards
+
+        # Deal five cards or until the end of the deck is reached
+        while count < 5 and current:
+            card_to_deal = current  # Get the current card to deal
+            current = current.next  # Move to the next card in the deck
+            card_to_deal.next = None  # Remove the card from the deck
+            player.receive_card(card_to_deal)  # Deal the card to the player
+            if not dealt_cards:
+                dealt_cards = card_to_deal  # Update the dealt cards variable if it's the first dealt card
+            count += 1
+
+        # Update the head of the deck to the next card after the dealt cards
+        self.head = current
+
+        return dealt_cards
+                        
 class Player:
     def __init__(self):
         self.hand = None
@@ -183,12 +203,59 @@ print(colors.PURPLE + '             **********    **********       ******       
 colorfulBannerRows(4)
 
 deck = Deck()
-shuffled_deck = deck.shuffle()
-player = Player()
-player_hand = player.receive_card(shuffled_deck.deal_cards())
+deck.shuffle()
+user = Player()
+user_hand = deck.deal_cards(user)
+computer = Player()
+computer_hand = deck.deal_cards(computer)
 
 # Print the player's hand
-current_card = player_hand
-while current_card:
-    print(current_card.suit, current_card.value)
-    current_card = current_card.next
+
+print('')
+
+# Define a function to print a single card
+def print_card(card):
+    virtual_card = (
+        colors.PURPLE + ' ----------------- ' + colors.END + '\n' +
+        colors.PURPLE + (f'| {card.value}{card.suit}             |' if len(f'{card.value}{card.suit}') == 3 else f'| {card.value}{card.suit}              |') + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + '|                 |' + colors.END + '\n' +
+        colors.PURPLE + (f'|             {card.value}{card.suit} |' if len(f'{card.value}{card.suit}') == 3 else f'|              {card.value}{card.suit} |') + colors.END + '\n' + 
+        colors.PURPLE + ' ----------------- ' + colors.END + '\n'
+    )
+    return virtual_card
+
+user_current_card = user_hand
+computer_current_card = computer_hand
+
+user_list = []
+computer_list = []
+
+while user_current_card or computer_current_card:
+    user_list.append(print_card(user_current_card))
+    computer_list.append(print_card(computer_current_card))
+    user_current_card = user_current_card.next
+    computer_current_card = computer_current_card.next
+
+print(colors.BOLD + colors.UNDERLINE + colors.GREEN + '                                  YOUR HAND:                                         ' + colors.END)
+
+# Print user's cards above computer's cards
+for i in range(11):  # 9 lines in each card
+    for card in user_list:
+        print(card.split('\n')[i], end='  ')  # Print the ith line of each card with two spaces between
+    print()  # Move to the next line after printing all user's cards
+
+print()  # Add a line break between user's and computer's cards
+
+print(colors.BOLD + colors.UNDERLINE + colors.GREEN + '                                  COMPUTER HAND:                                         ' + colors.END)
+
+for i in range(11):  # 9 lines in each card
+    for card in computer_list:
+        print(card.split('\n')[i], end='  ')  # Print the ith line of each card with two spaces between
+    print()  # Move to the next line after printing all computer's cards
+

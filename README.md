@@ -1,5 +1,6 @@
 # Jacks or Better
- A personal project to develop my python skills and do something fun. This is the card game "Jacks Or Better" programmed in Python.
+ A personal project to develop my python skills and do something fun. This is the card game "Jacks Or Better" programmed in Python. 
+ (Unfinished and currently creating)
 
  ## Features of this code:
   * Object Oriented Programming
